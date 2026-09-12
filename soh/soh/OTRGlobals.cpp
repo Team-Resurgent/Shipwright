@@ -2,6 +2,7 @@
 #include "OTRAudio.h"
 #include <algorithm>
 #include <atomic>
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <vector>
@@ -308,6 +309,7 @@ OTRGlobals::OTRGlobals() {
 
     SohGui::SetupMenu();
 
+#if !defined(LUS_XBOX)
     if (sohArchiveVersionMatch) {
 
         auto overlay = context->GetRawInstance()->GetWindow()->GetGui()->GetGameOverlay();
@@ -325,6 +327,11 @@ OTRGlobals::OTRGlobals() {
         fontJapanese = CreateFontWithSize(24.0f, "fonts/NotoSansJP-Regular.ttf", true);
         ImGui::GetIO().FontDefault = fontStandardLarger;
     }
+#else
+    // Xbox: skip loading the UI/overlay fonts — the ImGui menus/overlay aren't rasterized yet
+    // (null render backend) and the CJK NotoSansJP atlas alone would blow the console RAM budget.
+    (void)sohArchiveVersionMatch;
+#endif
 
     previousImGuiScaleIndex = -1;
     previousImGuiScale = defaultImGuiScale;
@@ -856,6 +863,9 @@ void OTRGlobals::Initialize() {
     // The menu is set up before audio is initialized, so its list of available audio backends has to be
     // populated here rather than in Menu::InitElement (where the window backends are handled).
     SohGui::GetSohMenu()->UpdateAudioBackendObjects();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] Initialize: UpdateAudioBackendObjects done; registering factories\n"); std::fflush(stdout);
+#endif
 
     SPDLOG_INFO("Starting Ship of Harkinian version {} (Branch: {} | Commit: {})", (char*)gBuildVersion,
                 (char*)gGitBranch, (char*)gGitCommitHash);
@@ -933,15 +943,36 @@ void OTRGlobals::Initialize() {
     loader->RegisterResourceFactory(std::make_shared<SOH::ResourceFactoryBinaryBackgroundV0>(), RESOURCE_FORMAT_BINARY,
                                     "Background", static_cast<uint32_t>(SOH::ResourceType::SOH_Background), 0);
 
+#if defined(LUS_XBOX)
+    std::printf("[xbox] Initialize: factories registered; Lang::LoadLangs\n"); std::fflush(stdout);
+#endif
     Lang::LoadLangs();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] Initialize: LoadLangs done; rando static data\n"); std::fflush(stdout);
+#endif
 
     gSaveStateMgr = std::make_shared<SaveStateMgr>();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] rando: SaveStateMgr ok; InitStaticData\n"); std::fflush(stdout);
+#endif
     gRandoContext->InitStaticData();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] rando: InitStaticData ok; CreateInstance\n"); std::fflush(stdout);
+#endif
     gRandoContext = Rando::Context::CreateInstance();
     Rando::Settings::GetInstance()->AssignContext(gRandoContext);
+#if defined(LUS_XBOX)
+    std::printf("[xbox] rando: CreateInstance+AssignContext ok; InitItemTable\n"); std::fflush(stdout);
+#endif
     Rando::StaticData::InitItemTable(); // RANDOTODO make this not rely on context's logic so it can be initialised in
                                         // InitStaticData
+#if defined(LUS_XBOX)
+    std::printf("[xbox] rando: InitItemTable ok; constructing Randomizer\n"); std::fflush(stdout);
+#endif
     gRandomizer = std::make_shared<Randomizer>();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] Initialize: rando + randomizer constructed\n"); std::fflush(stdout);
+#endif
 
     hasMasterQuest = hasOriginal = false;
 
@@ -961,14 +992,26 @@ void OTRGlobals::Initialize() {
         if (!ValidHashes.contains(version)) {
 #if defined(__SWITCH__)
             SPDLOG_ERROR("Invalid OTR File!");
+            exit(1);
 #elif defined(__WIIU__)
             Ship::WiiU::ThrowInvalidOTR();
+            exit(1);
+#elif defined(LUS_XBOX)
+            // The torch-extracted oot-mq.o2r carries a version id that doesn't match SoH's
+            // hardcoded GameVersions constants (torch vs SoH stamp the ROM version slightly
+            // differently). The archive was extracted with the MQ-debug config, so the data is
+            // valid MQ; accept it and treat it as Master Quest rather than exit. TODO: reconcile
+            // the exact version hash so this passes the normal ValidHashes path.
+            std::printf("[xbox] game version 0x%08X not in ValidHashes; accepting as Master Quest\n", version);
+            std::fflush(stdout);
+            hasMasterQuest = true;
+            continue;
 #else
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Invalid OTR File",
                                      "Attempted to load an invalid OTR file. Try regenerating.", nullptr);
             SPDLOG_ERROR("Invalid OTR File!");
-#endif
             exit(1);
+#endif
         }
         switch (version) {
             case OOT_PAL_MQ:
@@ -1546,9 +1589,18 @@ bool VerifyArchiveVersion(OTRVersion version) {
 
 extern "C" void InitOTR(int argc, char* argv[]) {
     OTRGlobals::Instance = new OTRGlobals();
+#if !defined(LUS_XBOX)
+    // RunExtract is the desktop ROM->O2R extraction/regeneration flow. It blocks on modal
+    // popups (outdated/missing archives, the assets/ folder check) driven by an interactive
+    // GUI + input. The Xbox ships pre-built soh.o2r/oot-mq.o2r on the disc and never extracts
+    // at runtime, so skip it; Initialize() below AddArchive()s the game data directly.
     OTRGlobals::Instance->RunExtract(argc, argv);
+#endif
 
     OTRGlobals::Instance->Initialize();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: Initialize() returned; continuing manager init\n"); std::fflush(stdout);
+#endif
     CustomMessageManager::Instance = new CustomMessageManager();
     ItemTableManager::Instance = new ItemTableManager();
     GameInteractor::Instance = new GameInteractor();
@@ -1565,10 +1617,19 @@ extern "C" void InitOTR(int argc, char* argv[]) {
     conf->RunVersionUpdates();
 
     SohGui::SetupGuiElements();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: SetupGuiElements done\n"); std::fflush(stdout);
+#endif
     SohGui::SetupMenuElements();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: SetupMenuElements done\n"); std::fflush(stdout);
+#endif
 
     AudioCollection::Instance = new AudioCollection();
     ActorDB::Instance = new ActorDB();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: AudioCollection+ActorDB done\n"); std::fflush(stdout);
+#endif
 #ifdef __APPLE__
     SpeechSynthesizer::Instance = new DarwinSpeechSynthesizer();
 #elif defined(_WIN32)
@@ -1579,16 +1640,28 @@ extern "C" void InitOTR(int argc, char* argv[]) {
     SpeechSynthesizer::Instance = new SpeechLogger();
 #endif
     SpeechSynthesizer::Instance->Init();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: SpeechSynthesizer done; netplay instances\n"); std::fflush(stdout);
+#endif
 
     CrowdControl::Instance = new CrowdControl();
     Sail::Instance = new Sail();
     Anchor::Instance = new Anchor();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: netplay instances done; OTR*_Init\n"); std::fflush(stdout);
+#endif
 
     OTRMessage_Init();
     OTRAudio_Init();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: OTRAudio_Init done\n"); std::fflush(stdout);
+#endif
     OTRExtScanner();
     VanillaItemTable_Init();
     DebugConsole_Init();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: OTR*_Init/VanillaItemTable/DebugConsole done\n"); std::fflush(stdout);
+#endif
 
     // #region SOH [Randomizer] TODO: Remove these and refactor spoiler file handling for randomizer
     CVarClear(CVAR_GENERAL("RandomizerNewFileDropped"));
@@ -1618,9 +1691,15 @@ extern "C" void InitOTR(int argc, char* argv[]) {
     if (CVarGetInteger(CVAR_REMOTE_ANCHOR("Enabled"), 0)) {
         Anchor::Instance->Enable();
     }
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: pre-ShipInit::InitAll\n"); std::fflush(stdout);
+#endif
     ShipInit::InitAll();
     Rando::StaticData::InitHashMaps();
     OTRGlobals::Instance->gRandoContext->AddExcludedOptions();
+#if defined(LUS_XBOX)
+    std::printf("[xbox] InitOTR: COMPLETE (returning to main)\n"); std::fflush(stdout);
+#endif
 }
 
 extern "C" void SaveManager_ThreadPoolWait() {

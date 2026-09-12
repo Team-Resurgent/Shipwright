@@ -1,6 +1,7 @@
 #include "ShipUtils.h"
 #include <cassert>
 #include <random>
+#include <bit> // std::rotr (C++20)
 #include "soh_assets.h"
 #include <libultraship/bridge/consolevariablebridge.h>
 

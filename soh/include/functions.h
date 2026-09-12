@@ -63,6 +63,11 @@ u32 Locale_IsRegionNative(void);
 void _assert(const char* exp, const char* file, s32 line);
 #elif defined(__linux__)
 void __assert(const char* exp, const char* file, s32 line) __THROW;
+#elif defined(LUS_XBOX)
+// RXDK's libc declares __assert as [[noreturn]] (assert.h). Use the SAME standard-attribute
+// spelling here: clang requires the C++ [[noreturn]] to be present on the first declaration,
+// and treats a GNU __attribute__((noreturn)) first-decl as not counting.
+[[noreturn]] void __assert(const char* exp, const char* file, s32 line);
 #elif !defined(__APPLE__) && !defined(__SWITCH__) && !defined(__OpenBSD__)
 void __assert(const char* exp, const char* file, s32 line);
 #endif

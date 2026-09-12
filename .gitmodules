@@ -1,8 +1,8 @@
 [submodule "libultraship"]
 	path = libultraship
-	url = https://github.com/kenix3/libultraship.git
-	branch = port-maintenance
+	url = https://github.com/Team-Resurgent/libultraship.git
+	branch = teamresurgent
 [submodule "torch"]
 	path = torch
-	url = https://github.com/HarbourMasters/Torch.git
-	branch = main
+	url = https://github.com/Team-Resurgent/Torch.git
+	branch = teamresurgent

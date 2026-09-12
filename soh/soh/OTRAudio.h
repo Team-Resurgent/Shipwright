@@ -1,6 +1,8 @@
 #pragma once
 #include <thread>
 #include <condition_variable>
+#include <atomic>
+#include <mutex>
 
 static struct {
     std::thread thread;

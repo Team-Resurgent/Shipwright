@@ -93,12 +93,24 @@ typedef struct {
     /* 0x14 */ s16  data[REG_GROUPS * REG_PER_GROUP]; // 0xAE0 entries
 } GameInfo; // size = 0x15D4
 
-// Changed the main buffers to be 1MiB to make them basically impossible to overflow
+// Changed the main buffers to be 1MiB to make them basically impossible to overflow.
+// Xbox (LUS_XBOX): 1MiB * 3 * 8B * 2 pools = 48 MB of static BSS, fatal on a 64 MB console.
+// Shrink to values with a large safety margin over the original N64 sizes (0x17E0/0x800/0x400)
+// but a fraction of the RAM: (0x40000+0x20000+0x10000)*8B ~= 3.6 MB/pool, ~7.3 MB total.
+#if defined(LUS_XBOX)
+#define GFXPOOL_POLYOPA_LEN 0x40000
+#define GFXPOOL_POLYXLU_LEN 0x20000
+#define GFXPOOL_OVERLAY_LEN 0x10000
+#else
+#define GFXPOOL_POLYOPA_LEN (1 * 1024 * 1024)
+#define GFXPOOL_POLYXLU_LEN (1 * 1024 * 1024)
+#define GFXPOOL_OVERLAY_LEN (1 * 1024 * 1024)
+#endif
 typedef struct {
     /* 0x00000 */ u16 headMagic; // GFXPOOL_HEAD_MAGIC
-    /* 0x00008 */ Gfx polyOpaBuffer[1 * 1024 * 1024]; // original size was 0x17E0
-    /* 0x0BF08 */ Gfx polyXluBuffer[1 * 1024 * 1024]; // original size was 0x800
-    /* 0x0FF08 */ Gfx overlayBuffer[1 * 1024 * 1024]; // original size was 0x400
+    /* 0x00008 */ Gfx polyOpaBuffer[GFXPOOL_POLYOPA_LEN]; // original size was 0x17E0
+    /* 0x0BF08 */ Gfx polyXluBuffer[GFXPOOL_POLYXLU_LEN]; // original size was 0x800
+    /* 0x0FF08 */ Gfx overlayBuffer[GFXPOOL_OVERLAY_LEN]; // original size was 0x400
     /* 0x11F08 */ Gfx workBuffer[0x80];
     /* 0x11308 */ Gfx unusedBuffer[0x20];
     /* 0x12408 */ u16 tailMagic; // GFXPOOL_TAIL_MAGIC

@@ -1,0 +1,28 @@
+# RXDK/Xbox port — ignore build outputs and (critically) extracted game assets.
+
+# Build outputs
+out/
+Build/
+XISO/
+*.obj
+*.o
+*.d
+*.lib
+*.exe
+*.xbe
+*.iso
+*.dxt
+*.pdb
+*.rsp
+
+# Extracted / packed game assets — Nintendo ROM data, NEVER commit.
+*.o2r
+*.otr
+*.z64
+*.n64
+*.v64
+assets/extracted/
+baserom*
+# Staged copies deployed onto the ISO
+soh-app/oot-mq.o2r
+soh-app/soh.o2r

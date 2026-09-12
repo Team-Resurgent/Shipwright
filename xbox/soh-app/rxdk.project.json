@@ -1,0 +1,188 @@
+{
+  "name": "soh-app",
+  "defaultConfiguration": "Release",
+  "configurations": {
+    "Release": {
+      "configuration": "release",
+      "sources": [
+        "../../soh/src/code/main.c",
+        "xbox_boot.cpp",
+        "build.c",
+        "xbox_stubs.cpp",
+        "xbox_class_stubs.cpp"
+      ],
+      "includePaths": [
+        "../../soh/include",
+        "../../soh/src",
+        "../../soh",
+        "../../soh/assets",
+        "../../soh/soh",
+        "../../libultraship/include",
+        "../../libultraship/src",
+        "../compat",
+        "../vendor",
+        "../vendor/imgui",
+        "../vendor/StormLib/src",
+        "../vendor/thread-pool",
+        "../vendor/libzip/src"
+      ],
+      "defines": [
+        "LUS_XBOX=1",
+        "F3DEX_GBI_2",
+        "CONTROLLERBUTTONS_T=uint32_t",
+        "INCLUDE_MPQ_SUPPORT",
+        "_GNU_SOURCE",
+        "NDEBUG",
+        "_CONSOLE",
+        "_CRT_SECURE_NO_WARNINGS",
+        "UNICODE",
+        "_UNICODE",
+        "SPDLOG_NO_THREAD_ID",
+        "SPDLOG_NO_TLS",
+        "STBI_NO_THREAD_LOCALS",
+        "SPDLOG_ACTIVE_LEVEL=0",
+        "LOG_LEVEL_GAME_PRINTS=6"
+      ],
+      "compileFlags": [
+        "-include",
+        "lus_lang.h",
+        "-include",
+        "lus_cvars.h",
+        "-Wno-everything",
+        "-U_WIN32",
+        "-U_WIN64",
+        "-U__MINGW32__",
+        "-U__MINGW64__",
+        "-fno-ms-compatibility"
+      ],
+      "projectReferences": [
+        "..",
+        "../soh-src",
+        "../soh-soh"
+      ],
+      "libraries": [
+        "libxapi",
+        "libd3d8",
+        "libd3dx8",
+        "libxgraphics",
+        "libdsound",
+        "libkernel",
+        "libc",
+        "libcpp"
+      ],
+      "cppStandard": "c++23",
+      "createIso": true,
+      "imageBuild": {
+        "stackSize": 1048576,
+        "debug": true,
+        "noLogo": true,
+        "noLibWarn": true,
+        "limitMemory": false,
+        "dontModifyHardDisk": false,
+        "dontMountUtilityDrive": true,
+        "formatUtilityDrive": false,
+        "testId": "0x534f4801",
+        "testName": "ShipOfHarkinian",
+        "testVersion": "4096",
+        "titleImage": "C:/ProgramData/RXDK/samples/RxdkSamples/Common/rxdk-titleimage.xbx",
+        "defaultSaveImage": "C:/ProgramData/RXDK/samples/RxdkSamples/Common/rxdk-saveimage.xbx"
+      },
+      "deployPaths": [
+        "oot-mq.o2r",
+        "soh.o2r"
+      ],
+      "outputDir": "out/Release"
+    },
+    "Debug": {
+      "configuration": "debug",
+      "sources": [
+        "../../soh/src/code/main.c",
+        "xbox_boot.cpp",
+        "build.c",
+        "xbox_stubs.cpp",
+        "xbox_class_stubs.cpp"
+      ],
+      "includePaths": [
+        "../../soh/include",
+        "../../soh/src",
+        "../../soh",
+        "../../soh/assets",
+        "../../soh/soh",
+        "../../libultraship/include",
+        "../../libultraship/src",
+        "../compat",
+        "../vendor",
+        "../vendor/imgui",
+        "../vendor/StormLib/src",
+        "../vendor/thread-pool",
+        "../vendor/libzip/src"
+      ],
+      "defines": [
+        "LUS_XBOX=1",
+        "F3DEX_GBI_2",
+        "CONTROLLERBUTTONS_T=uint32_t",
+        "INCLUDE_MPQ_SUPPORT",
+        "_GNU_SOURCE",
+        "NDEBUG",
+        "_CONSOLE",
+        "_CRT_SECURE_NO_WARNINGS",
+        "UNICODE",
+        "_UNICODE",
+        "SPDLOG_NO_THREAD_ID",
+        "SPDLOG_NO_TLS",
+        "STBI_NO_THREAD_LOCALS",
+        "SPDLOG_ACTIVE_LEVEL=0",
+        "LOG_LEVEL_GAME_PRINTS=6"
+      ],
+      "compileFlags": [
+        "-include",
+        "lus_lang.h",
+        "-include",
+        "lus_cvars.h",
+        "-Wno-everything",
+        "-U_WIN32",
+        "-U_WIN64",
+        "-U__MINGW32__",
+        "-U__MINGW64__",
+        "-fno-ms-compatibility"
+      ],
+      "projectReferences": [
+        "..",
+        "../soh-src",
+        "../soh-soh"
+      ],
+      "libraries": [
+        "libxapi",
+        "libd3d8",
+        "libd3dx8",
+        "libxgraphics",
+        "libdsound",
+        "libkernel",
+        "libc",
+        "libcpp"
+      ],
+      "cppStandard": "c++23",
+      "createIso": true,
+      "imageBuild": {
+        "stackSize": 1048576,
+        "debug": true,
+        "noLogo": true,
+        "noLibWarn": true,
+        "limitMemory": false,
+        "dontModifyHardDisk": false,
+        "dontMountUtilityDrive": true,
+        "formatUtilityDrive": false,
+        "testId": "0x534f4801",
+        "testName": "ShipOfHarkinian",
+        "testVersion": "4096",
+        "titleImage": "C:/ProgramData/RXDK/samples/RxdkSamples/Common/rxdk-titleimage.xbx",
+        "defaultSaveImage": "C:/ProgramData/RXDK/samples/RxdkSamples/Common/rxdk-saveimage.xbx"
+      },
+      "deployPaths": [
+        "oot-mq.o2r",
+        "soh.o2r"
+      ],
+      "outputDir": "out/Debug"
+    }
+  }
+}

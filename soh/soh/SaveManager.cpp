@@ -489,9 +489,13 @@ void SaveManager::Init() {
     auto sOldSavePath = Ship::Context::GetPathRelativeToAppDirectory("oot_save.sav");
     auto sOldBackupSavePath = Ship::Context::GetPathRelativeToAppDirectory("oot_save.bak");
 
-    // If the save directory does not exist, create it
+    // If the save directory does not exist, create it. Use the non-throwing overload: on the
+    // Xbox the app directory is the read-only game disc (D:\), so directory creation fails --
+    // that must not abort the title. (Writable save storage on a HDD partition is wired up in
+    // the save-system phase.)
     if (!std::filesystem::exists(sSavePath)) {
-        std::filesystem::create_directory(sSavePath);
+        std::error_code sSavePathEc;
+        std::filesystem::create_directory(sSavePath, sSavePathEc);
     }
 
     // If there is a lingering unversioned save, convert it
