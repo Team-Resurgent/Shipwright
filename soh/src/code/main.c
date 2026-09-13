@@ -63,14 +63,8 @@ int main(int argc, char* argv[]) {
     // TODO: Was moved to below InitOTR because it requires window to be setup. But will be late to catch crashes.
     CrashHandlerRegisterCallback(CrashHandler_PrintSohData);
     BootCommands_Init();
-#if defined(LUS_XBOX)
-    printf("[xbox] main: BootCommands_Init done; Heaps_Alloc\n"); fflush(stdout);
-#endif
 
     Heaps_Alloc();
-#if defined(LUS_XBOX)
-    printf("[xbox] main: Heaps_Alloc done; calling Main()\n"); fflush(stdout);
-#endif
     Main(0);
     DeinitOTR();
     Heaps_Free();
@@ -144,13 +138,7 @@ void Main(void* arg) {
     osStartThread(&sGraphThread);
     osSetThreadPri(0, Z_PRIORITY_SCHED);
 
-#if defined(LUS_XBOX)
-    printf("[xbox] main: entering Graph_ThreadEntry (game loop)\n"); fflush(stdout);
-#endif
     Graph_ThreadEntry(0);
-#if defined(LUS_XBOX)
-    printf("[xbox] main: Graph_ThreadEntry returned\n"); fflush(stdout);
-#endif
 
     while (true) {
         msg = NULL;

@@ -449,16 +449,10 @@ static void RunFrame() {
 
     osSyncPrintf("グラフィックスレッド実行開始\n"); // "Start graphic thread execution"
     Graph_Init(&runFrameContext.gfxCtx);
-#if defined(LUS_XBOX)
-    printf("[xbox] graph: Graph_Init done\n"); fflush(stdout);
-#endif
 
     while (runFrameContext.nextOvl) {
         runFrameContext.ovl = runFrameContext.nextOvl;
         Overlay_LoadGameState(runFrameContext.ovl);
-#if defined(LUS_XBOX)
-        printf("[xbox] graph: Overlay_LoadGameState done\n"); fflush(stdout);
-#endif
 
         size = runFrameContext.ovl->instanceSize;
         osSyncPrintf("クラスサイズ＝%dバイト\n", size); // "Class size = %d bytes"
@@ -472,9 +466,6 @@ static void RunFrame() {
             Fault_AddHungupAndCrashImpl("GAME CLASS MALLOC FAILED", faultMsg);
         }
         GameState_Init(gGameState, runFrameContext.ovl->init, &runFrameContext.gfxCtx);
-#if defined(LUS_XBOX)
-        printf("[xbox] graph: GameState_Init done\n"); fflush(stdout);
-#endif
 
         uint64_t freq = GetFrequency();
 
@@ -485,24 +476,15 @@ static void RunFrame() {
             Graph_StartFrame();
 
             PadMgr_ThreadEntry(&gPadMgr);
-#if defined(LUS_XBOX)
-            printf("[xbox] graph: frame: StartFrame+Pad done; Graph_Update\n"); fflush(stdout);
-#endif
 
             Graph_Update(&runFrameContext.gfxCtx, gGameState);
             // ticksB = GetPerfCounter();
-#if defined(LUS_XBOX)
-            printf("[xbox] graph: Graph_Update done; ProcessGfxCommands\n"); fflush(stdout);
-#endif
 
             if (GfxDebuggerIsDebuggingRequested()) {
                 GfxDebuggerDebugDisplayList(runFrameContext.gfxCtx.workBuffer);
             }
 
             Graph_ProcessGfxCommands(runFrameContext.gfxCtx.workBuffer);
-#if defined(LUS_XBOX)
-            printf("[xbox] graph: ProcessGfxCommands done (frame complete)\n"); fflush(stdout);
-#endif
 
             // uint64_t diff = (ticksB - ticksA) / (freq / 1000);
             // printf("Frame simulated in %ims\n", diff);
